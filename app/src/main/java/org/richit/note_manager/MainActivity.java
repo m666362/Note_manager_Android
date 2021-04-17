@@ -14,6 +14,7 @@ import android.widget.DatePicker;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.androidnetworking.AndroidNetworking;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -38,22 +39,15 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager( new LinearLayoutManager( this ) );
         recyclerView.setAdapter( noteAdapter );
 
-        notes.add( new Note( "I am title", "I am description" ) );
-        notes.add( new Note( "I am title", "I am description" ) );
-        notes.add( new Note( "I am title", "I am description" ) );
-        notes.add( new Note( "I am title", "I am description" ) );
-        notes.add( new Note( "I am title", "I am description" ) );
-        notes.add( new Note( "I am title", "I am description" ) );
-        notes.add( new Note( "I am title", "I am description" ) );
+        AndroidNetworking.initialize(getApplicationContext());
 
-        noteAdapter.notifyDataSetChanged();
-
+        notes.add( new Note( "I am title", "I am description" ) );
+        notes.add( new Note( "I am title", "I am description" ) );
 
         FloatingActionButton fab = findViewById( R.id.fab );
         fab.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText( MainActivity.this, "Hello world", Toast.LENGTH_SHORT ).show();
 
                 final Calendar calendar = Calendar.getInstance();
                 year = calendar.get( Calendar.YEAR );
@@ -70,10 +64,12 @@ public class MainActivity extends AppCompatActivity {
                         minute = c.get(Calendar.MINUTE);
                         TimePickerDialog timePickerDialog = new TimePickerDialog(MainActivity.this,
                                 new TimePickerDialog.OnTimeSetListener() {
-
                                     @Override
                                     public void onTimeSet(TimePicker view, int hour, int minute) {
                                         Toast.makeText( MainActivity.this, hour+"-"+minute, Toast.LENGTH_SHORT ).show();
+                                        time = hour+"-"+minute;
+                                        notes.add( new Note( date, time ) );
+                                        noteAdapter.notifyDataSetChanged();
                                     }
                                 }, hour, minute, false);
                         timePickerDialog.show();
@@ -82,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         } );
+        noteAdapter.notifyDataSetChanged();
 
     }
 }
