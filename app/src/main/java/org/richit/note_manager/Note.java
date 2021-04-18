@@ -4,18 +4,18 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class Note implements Parcelable {
-    String name;
+    String title;
     String description;
     String alarm;
 
-    public Note(String name, String description, String alarm) {
-        this.name = name;
+    public Note(String title, String description, String alarm) {
+        this.title = title;
         this.description = description;
         this.alarm = alarm;
     }
 
     protected Note(Parcel in) {
-        name = in.readString();
+        title = in.readString();
         description = in.readString();
         alarm = in.readString();
     }
@@ -32,12 +32,12 @@ public class Note implements Parcelable {
         }
     };
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getDescription() {
@@ -63,7 +63,7 @@ public class Note implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString( name );
+        parcel.writeString( title );
         parcel.writeString( description );
         parcel.writeString( alarm );
     }

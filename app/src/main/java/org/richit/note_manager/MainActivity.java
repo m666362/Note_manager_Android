@@ -23,9 +23,11 @@ import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.common.Priority;
 import com.androidnetworking.error.ANError;
 import com.androidnetworking.interfaces.JSONArrayRequestListener;
-import com.androidnetworking.interfaces.JSONObjectRequestListener;
+import com.androidnetworking.interfaces.StringRequestListener;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.richit.note_manager.databinding.ActivityMainBinding;
 
@@ -38,13 +40,11 @@ import java.util.Calendar;
 public class MainActivity extends AppCompatActivity {
 
     String TAG = this.getClass().getSimpleName();
-
     RecyclerView recyclerView;
     NoteAdapter noteAdapter;
     ArrayList<Note> notes = new ArrayList<>();
     private int year, month, day, hour, minute;
     String title, description, date, time;
-
     ActivityMainBinding binding;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -53,21 +53,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate( savedInstanceState );
 //        setContentView( R.layout.activity_main );
 
-        binding = DataBindingUtil.setContentView( this, R.layout.activity_main );
-
-        noteAdapter = new NoteAdapter( this, notes );
-        binding.noteRecyclerView.setLayoutManager( new LinearLayoutManager( this ) );
-        binding.noteRecyclerView.setAdapter( noteAdapter );
+        initObject();
+        getDataFromOnline();
 
 //        recyclerView = findViewById( R.id.note_recycler_view );
 //        noteAdapter = new NoteAdapter( this, notes );
 //        recyclerView.setLayoutManager( new LinearLayoutManager( this ) );
 //        recyclerView.setAdapter( noteAdapter );
-
-        AndroidNetworking.initialize( getApplicationContext() );
-        getDataFromOnline();
-
 //        FloatingActionButton fab = findViewById( R.id.fab );
+
         binding.fab.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -98,9 +92,7 @@ public class MainActivity extends AppCompatActivity {
                                                     public void onTimeSet(TimePicker view, int hour, int minute) {
                                                         Toast.makeText( MainActivity.this, hour + "-" + minute, Toast.LENGTH_SHORT ).show();
                                                         time = hour + "-" + minute;
-                                                        notes.add( new Note( "note", date, time ) );
                                                         postOnServer( "note", date, time );
-                                                        noteAdapter.notifyDataSetChanged();
                                                     }
                                                 }, hour, minute, false );
                                         timePickerDialog.show();
@@ -119,13 +111,14 @@ public class MainActivity extends AppCompatActivity {
         } );
         noteAdapter.notifyDataSetChanged();
 
-        binding.api.setOnClickListener( new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+    }
 
-            }
-        } );
-
+    private void initObject() {
+        AndroidNetworking.initialize( getApplicationContext() );
+        binding = DataBindingUtil.setContentView( this, R.layout.activity_main );
+        noteAdapter = new NoteAdapter( this, notes );
+        binding.noteRecyclerView.setLayoutManager( new LinearLayoutManager( this ) );
+        binding.noteRecyclerView.setAdapter( noteAdapter );
     }
 
     private void getDataFromOnline() {
@@ -137,13 +130,17 @@ public class MainActivity extends AppCompatActivity {
                 .getAsJSONArray( new JSONArrayRequestListener() {
                     @Override
                     public void onResponse(JSONArray response) {
-                        Log.d( TAG, "onResponse: " );
-                        new AlertDialog
-                                .Builder( MainActivity.this )
-                                .setTitle( "Data" )
-                                .setMessage( response.toString() )
-                                .setCancelable( true )
-                                .show();
+                        Log.d( TAG, "onResponse: "+ response);
+                        for(int n = 0; n < response.length(); n++)
+                        {
+                            try {
+                                JSONObject object = response.getJSONObject(n);
+                                Note note = new Gson().fromJson( String.valueOf( object ), Note.class );
+                                addData( note );
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
 
                     @Override
@@ -154,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
                 } );
     }
 
-    private void postOnServer(String tile, String description, String alarm) {
+    private void postOnServer(String title, String description, String alarm) {
         AndroidNetworking.post("https://note-manager-parkingkoi.herokuapp.com/notes/")
                 .addBodyParameter("title", title)
                 .addBodyParameter("description", description)
@@ -162,26 +159,24 @@ public class MainActivity extends AppCompatActivity {
                 .setTag("test")
                 .setPriority(Priority.MEDIUM)
                 .build()
-                .getAsJSONObject(new JSONObjectRequestListener() {
+                .getAsString( new StringRequestListener() {
                     @Override
-                    public void onResponse(JSONObject response) {
-                        new AlertDialog
-                                .Builder( MainActivity.this )
-                                .setTitle( "Data" )
-                                .setMessage( response.toString() )
-                                .setCancelable( true )
-                                .show();
+                    public void onResponse(String response) {
+                        Note note = new Gson().fromJson( response, Note.class );
+                        addData(note);
                     }
+
                     @Override
-                    public void onError(ANError error) {
-                        new AlertDialog
-                                .Builder( MainActivity.this )
-                                .setTitle( "Data" )
-                                .setMessage( error.toString() )
-                                .setCancelable( true )
-                                .show();
+                    public void onError(ANError anError) {
+                        Toast.makeText( MainActivity.this, "Something went wrong", Toast.LENGTH_SHORT ).show();
                     }
-                });
+                } );
+    }
+
+    private void addData(Note note) {
+        Log.d( TAG, "addData: "+note );
+        notes.add( note );
+        noteAdapter.notifyDataSetChanged();
     }
 
 }
