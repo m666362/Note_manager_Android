@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -37,14 +38,17 @@ import java.util.Calendar;
 // http://192.168.0.151:4000/users
 // https://restcountries.eu/rest/v2/name/bangladesh
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     String TAG = this.getClass().getSimpleName();
     RecyclerView recyclerView;
     NoteAdapter noteAdapter;
     ArrayList<Note> notes = new ArrayList<>();
     private int year, month, day, hour, minute;
-    String title, description, date, time;
+    EditText note_title_Et;
+    String title;
+    String date;
+    String time;
     ActivityMainBinding binding;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -54,14 +58,14 @@ public class MainActivity extends AppCompatActivity {
 
         initObject();
         getDataFromOnline();
+        setInitialRequirement();
 
-        binding.fab.setOnClickListener( new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setNote();
-            }
-        } );
+    }
 
+    private void setInitialRequirement() {
+        binding.setAlarm.setOnClickListener( this );
+        binding.cancelAlarm.setOnClickListener( this );
+        binding.fab.setOnClickListener( this );
     }
 
     private void initObject() {
@@ -104,14 +108,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setNote() {
+        View view = LayoutInflater.from( MainActivity.this ).inflate( R.layout.dialog_signal, null );
         new AlertDialog
                 .Builder( MainActivity.this )
-                .setView( LayoutInflater.from( MainActivity.this ).inflate( R.layout.dialog_signal, null ) )
+                .setView( view)
                 .setTitle( "Take a note" )
                 .setCancelable( false )
                 .setPositiveButton( "Save", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
+                        note_title_Et = (EditText) view.findViewById( R.id.title_d );
+                        title = note_title_Et.getText().toString();
                         final Calendar calendar = Calendar.getInstance();
                         year = calendar.get( Calendar.YEAR );
                         month = calendar.get( Calendar.MONTH );
@@ -130,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
                                             public void onTimeSet(TimePicker view, int hour, int minute) {
                                                 Toast.makeText( MainActivity.this, hour + "-" + minute, Toast.LENGTH_SHORT ).show();
                                                 time = hour + "-" + minute;
-                                                postOnServer( "note", date, time );
+                                                postOnServer( title, date, time );
                                             }
                                         }, hour, minute, false );
                                 timePickerDialog.show();
@@ -174,4 +181,18 @@ public class MainActivity extends AppCompatActivity {
         noteAdapter.notifyDataSetChanged();
     }
 
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()){
+            case R.id.setAlarm:
+                Toast.makeText( this, "alarm set", Toast.LENGTH_SHORT ).show();
+                break;
+            case R.id.cancelAlarm:
+                Toast.makeText( this, "cancelled", Toast.LENGTH_SHORT ).show();
+                break;
+            case R.id.fab:
+                setNote();
+                break;
+        }
+    }
 }
