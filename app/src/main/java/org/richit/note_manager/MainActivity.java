@@ -218,14 +218,4 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Toast.makeText(getApplicationContext(), "Alarm Cancelled", Toast.LENGTH_LONG).show();
     }
 
-    private void setAlarm() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, 0, pendingIntent);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, 0, pendingIntent);
-        } else {
-            alarmManager.set(AlarmManager.RTC_WAKEUP, 0, pendingIntent);
-        }
-        Toast.makeText( this, "alarm set", Toast.LENGTH_SHORT ).show();
-    }
 }
