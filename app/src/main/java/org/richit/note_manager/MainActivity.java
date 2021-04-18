@@ -1,8 +1,12 @@
 package org.richit.note_manager;
 
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -51,6 +55,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     String time;
     ActivityMainBinding binding;
 
+    AlarmManager alarmManager;
+    PendingIntent pendingIntent;
+
+
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +68,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initObject();
         getDataFromOnline();
         setInitialRequirement();
+        alarmManager = (AlarmManager) getSystemService( Context.ALARM_SERVICE);
+
+        //
+        startService(new Intent(MainActivity.this, MyService.class));
+
 
     }
 
@@ -138,6 +152,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                                 Toast.makeText( MainActivity.this, hour + "-" + minute, Toast.LENGTH_SHORT ).show();
                                                 time = hour + "-" + minute;
                                                 postOnServer( title, date, time );
+
+                                                // GlobalMethods.sendCustomBroadcastAt( MainActivity.this,  );
+
                                             }
                                         }, hour, minute, false );
                                 timePickerDialog.show();
@@ -185,14 +202,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.setAlarm:
-                Toast.makeText( this, "alarm set", Toast.LENGTH_SHORT ).show();
+                setAlarm();
                 break;
             case R.id.cancelAlarm:
-                Toast.makeText( this, "cancelled", Toast.LENGTH_SHORT ).show();
+                cancelAlarm();
                 break;
             case R.id.fab:
                 setNote();
                 break;
         }
+    }
+
+    private void cancelAlarm() {
+        alarmManager.cancel(pendingIntent);
+        Toast.makeText(getApplicationContext(), "Alarm Cancelled", Toast.LENGTH_LONG).show();
+    }
+
+    private void setAlarm() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, 0, pendingIntent);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, 0, pendingIntent);
+        } else {
+            alarmManager.set(AlarmManager.RTC_WAKEUP, 0, pendingIntent);
+        }
+        Toast.makeText( this, "alarm set", Toast.LENGTH_SHORT ).show();
     }
 }
