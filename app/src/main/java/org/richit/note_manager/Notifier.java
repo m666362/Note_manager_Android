@@ -55,7 +55,6 @@ public class Notifier {
             Notifier.notification = builder.getNotification();
         }
         notificationManager.notify(1000, Notifier.notification);
-
         notificationOn = true;
     }
 
@@ -64,11 +63,9 @@ public class Notifier {
             builder.setOngoing(false);
             builder.setDefaults(Notification.DEFAULT_LIGHTS | Notification.DEFAULT_SOUND)
                     .setVibrate(new long[]{0L});
-
             if (notificationManager == null)
                 notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.cancel(1000);
-
             notificationOn = false;
         }
 
