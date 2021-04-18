@@ -122,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getDataFromOnline() {
+        notes.clear();
         AndroidNetworking
                 .get( "https://note-manager-parkingkoi.herokuapp.com/notes/" )
                 .setTag( "test" )
@@ -162,8 +163,8 @@ public class MainActivity extends AppCompatActivity {
                 .getAsString( new StringRequestListener() {
                     @Override
                     public void onResponse(String response) {
-                        Note note = new Gson().fromJson( response, Note.class );
-                        addData(note);
+                        getDataFromOnline();
+                        Toast.makeText( MainActivity.this, "note added", Toast.LENGTH_SHORT ).show();
                     }
 
                     @Override
