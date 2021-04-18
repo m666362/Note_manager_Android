@@ -38,6 +38,7 @@ import org.richit.note_manager.databinding.ActivityMainBinding;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 
 // http://192.168.0.151:4000/users
 // https://restcountries.eu/rest/v2/name/bangladesh
@@ -77,8 +78,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setInitialRequirement() {
-        binding.setAlarm.setOnClickListener( this );
-        binding.cancelAlarm.setOnClickListener( this );
         binding.fab.setOnClickListener( this );
     }
 
@@ -122,6 +121,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setNote() {
+        Date dateToSendNoti = new Date();
         View view = LayoutInflater.from( MainActivity.this ).inflate( R.layout.dialog_signal, null );
         new AlertDialog
                 .Builder( MainActivity.this )
@@ -153,7 +153,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                                 time = hour + "-" + minute;
                                                 postOnServer( title, date, time );
 
-                                                // GlobalMethods.sendCustomBroadcastAt( MainActivity.this,  );
+                                                dateToSendNoti.setDate( day );
+                                                dateToSendNoti.setYear( year );
+                                                dateToSendNoti.setMonth( month );
+                                                dateToSendNoti.setHours( hour );
+                                                dateToSendNoti.setMinutes( minute );
+
+                                                GlobalMethods.sendCustomBroadcastAt( MainActivity.this,  dateToSendNoti, Constants.SEND_NOTIFICATION, 729626);
 
                                             }
                                         }, hour, minute, false );
@@ -171,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void postOnServer(String title, String description, String alarm) {
-        AndroidNetworking.post("https://note-manager-parkingkoi.herokuapp.com/notes/")
+        AndroidNetworking.post(Constants.url)
                 .addBodyParameter("title", title)
                 .addBodyParameter("description", description)
                 .addBodyParameter( "alarm", alarm )
@@ -201,12 +207,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         switch (view.getId()){
-            case R.id.setAlarm:
-                setAlarm();
-                break;
-            case R.id.cancelAlarm:
-                cancelAlarm();
-                break;
             case R.id.fab:
                 setNote();
                 break;

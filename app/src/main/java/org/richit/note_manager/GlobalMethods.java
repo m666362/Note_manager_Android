@@ -4,25 +4,25 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Build;
 
 import java.util.Calendar;
 import java.util.Date;
 
 public class GlobalMethods {
-    public static void registerReceiver(Context context) {
-        IntentFilter receiverFilter = new IntentFilter();
 
-        if (!MyReceiver.isRegistered) {
-            try {
-                context.registerReceiver( MyReceiver.getInstance(), receiverFilter );
-                MyReceiver.isRegistered = true;
-            } catch (Exception e) {
-                //
-            }
-        }
-    }
+//    public static void registerReceiver(Context context) {
+//        IntentFilter receiverFilter = new IntentFilter();
+//
+//        if (!MyReceiver.isRegistered) {
+//            try {
+//                context.registerReceiver( MyReceiver.getInstance(), receiverFilter );
+//                MyReceiver.isRegistered = true;
+//            } catch (Exception e) {
+//                //
+//            }
+//        }
+//    }
 
     public static void sendCustomBroadcastAt(Context context, Date timeToSendBroadcast, String action, int requestCode) {
         Calendar calendar = Calendar.getInstance();

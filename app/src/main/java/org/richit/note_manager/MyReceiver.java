@@ -6,7 +6,7 @@ import android.content.Intent;
 
 public class MyReceiver extends BroadcastReceiver {
 
-    public static boolean isRegistered = false;
+    // public static boolean isRegistered = false;
     private static MyReceiver myBroadcastReceiver;
 
     public static MyReceiver getInstance() {
@@ -18,7 +18,8 @@ public class MyReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals( Constants.SEND_NOTIFICATION )) {
-            // Send notif
+
+            Notifier.sendNoti( "Remember Note!!!", "Time is up!", context );
         }
     }
 }
