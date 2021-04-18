@@ -51,65 +51,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate( savedInstanceState );
-//        setContentView( R.layout.activity_main );
 
         initObject();
         getDataFromOnline();
 
-//        recyclerView = findViewById( R.id.note_recycler_view );
-//        noteAdapter = new NoteAdapter( this, notes );
-//        recyclerView.setLayoutManager( new LinearLayoutManager( this ) );
-//        recyclerView.setAdapter( noteAdapter );
-//        FloatingActionButton fab = findViewById( R.id.fab );
-
         binding.fab.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                new AlertDialog
-                        .Builder( MainActivity.this )
-                        .setView( LayoutInflater.from( MainActivity.this ).inflate( R.layout.dialog_signal, null ) )
-                        .setTitle( "Take a note" )
-                        .setCancelable( false )
-                        .setPositiveButton( "Save", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                final Calendar calendar = Calendar.getInstance();
-                                year = calendar.get( Calendar.YEAR );
-                                month = calendar.get( Calendar.MONTH );
-                                day = calendar.get( Calendar.DATE );
-                                new DatePickerDialog( MainActivity.this, new DatePickerDialog.OnDateSetListener() {
-                                    @Override
-                                    public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                                        Toast.makeText( MainActivity.this, day + "-" + month + "-" + year, Toast.LENGTH_SHORT ).show();
-                                        date = day + "-" + month + "-" + year;
-                                        Calendar c = Calendar.getInstance();
-                                        hour = c.get( Calendar.HOUR_OF_DAY );
-                                        minute = c.get( Calendar.MINUTE );
-                                        TimePickerDialog timePickerDialog = new TimePickerDialog( MainActivity.this,
-                                                new TimePickerDialog.OnTimeSetListener() {
-                                                    @Override
-                                                    public void onTimeSet(TimePicker view, int hour, int minute) {
-                                                        Toast.makeText( MainActivity.this, hour + "-" + minute, Toast.LENGTH_SHORT ).show();
-                                                        time = hour + "-" + minute;
-                                                        postOnServer( "note", date, time );
-                                                    }
-                                                }, hour, minute, false );
-                                        timePickerDialog.show();
-                                    }
-                                }, year, month, day ).show();
-                            }
-                        } )
-                        .setNegativeButton( "Cancel", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                Toast.makeText( MainActivity.this, "Cancelled", Toast.LENGTH_SHORT ).show();
-                            }
-                        } ).show();
-
+                setNote();
             }
         } );
-        noteAdapter.notifyDataSetChanged();
 
     }
 
@@ -150,6 +101,49 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText( MainActivity.this, "Error", Toast.LENGTH_SHORT ).show();
                     }
                 } );
+    }
+
+    private void setNote() {
+        new AlertDialog
+                .Builder( MainActivity.this )
+                .setView( LayoutInflater.from( MainActivity.this ).inflate( R.layout.dialog_signal, null ) )
+                .setTitle( "Take a note" )
+                .setCancelable( false )
+                .setPositiveButton( "Save", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        final Calendar calendar = Calendar.getInstance();
+                        year = calendar.get( Calendar.YEAR );
+                        month = calendar.get( Calendar.MONTH );
+                        day = calendar.get( Calendar.DATE );
+                        new DatePickerDialog( MainActivity.this, new DatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                                Toast.makeText( MainActivity.this, day + "-" + month + "-" + year, Toast.LENGTH_SHORT ).show();
+                                date = day + "-" + month + "-" + year;
+                                Calendar c = Calendar.getInstance();
+                                hour = c.get( Calendar.HOUR_OF_DAY );
+                                minute = c.get( Calendar.MINUTE );
+                                TimePickerDialog timePickerDialog = new TimePickerDialog( MainActivity.this,
+                                        new TimePickerDialog.OnTimeSetListener() {
+                                            @Override
+                                            public void onTimeSet(TimePicker view, int hour, int minute) {
+                                                Toast.makeText( MainActivity.this, hour + "-" + minute, Toast.LENGTH_SHORT ).show();
+                                                time = hour + "-" + minute;
+                                                postOnServer( "note", date, time );
+                                            }
+                                        }, hour, minute, false );
+                                timePickerDialog.show();
+                            }
+                        }, year, month, day ).show();
+                    }
+                } )
+                .setNegativeButton( "Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Toast.makeText( MainActivity.this, "Cancelled", Toast.LENGTH_SHORT ).show();
+                    }
+                } ).show();
     }
 
     private void postOnServer(String title, String description, String alarm) {
