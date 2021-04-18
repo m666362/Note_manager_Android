@@ -5,6 +5,7 @@ import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.DatePicker;
@@ -22,14 +23,21 @@ import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.common.Priority;
 import com.androidnetworking.error.ANError;
 import com.androidnetworking.interfaces.JSONArrayRequestListener;
+import com.androidnetworking.interfaces.JSONObjectRequestListener;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.richit.note_manager.databinding.ActivityMainBinding;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 
+// http://192.168.0.151:4000/users
+// https://restcountries.eu/rest/v2/name/bangladesh
+
 public class MainActivity extends AppCompatActivity {
+
+    String TAG = this.getClass().getSimpleName();
 
     RecyclerView recyclerView;
     NoteAdapter noteAdapter;
@@ -57,9 +65,7 @@ public class MainActivity extends AppCompatActivity {
 //        recyclerView.setAdapter( noteAdapter );
 
         AndroidNetworking.initialize( getApplicationContext() );
-
-        notes.add( new Note( "I am title", "I am description" ) );
-        notes.add( new Note( "I am title", "I am description" ) );
+        getDataFromOnline();
 
 //        FloatingActionButton fab = findViewById( R.id.fab );
         binding.fab.setOnClickListener( new View.OnClickListener() {
@@ -81,21 +87,22 @@ public class MainActivity extends AppCompatActivity {
                                 new DatePickerDialog( MainActivity.this, new DatePickerDialog.OnDateSetListener() {
                                     @Override
                                     public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                                        Toast.makeText( MainActivity.this, day+"-"+month+"-"+year, Toast.LENGTH_SHORT ).show();
-                                        date = day+"-"+month+"-"+year;
+                                        Toast.makeText( MainActivity.this, day + "-" + month + "-" + year, Toast.LENGTH_SHORT ).show();
+                                        date = day + "-" + month + "-" + year;
                                         Calendar c = Calendar.getInstance();
-                                        hour = c.get(Calendar.HOUR_OF_DAY);
-                                        minute = c.get(Calendar.MINUTE);
-                                        TimePickerDialog timePickerDialog = new TimePickerDialog(MainActivity.this,
+                                        hour = c.get( Calendar.HOUR_OF_DAY );
+                                        minute = c.get( Calendar.MINUTE );
+                                        TimePickerDialog timePickerDialog = new TimePickerDialog( MainActivity.this,
                                                 new TimePickerDialog.OnTimeSetListener() {
                                                     @Override
                                                     public void onTimeSet(TimePicker view, int hour, int minute) {
-                                                        Toast.makeText( MainActivity.this, hour+"-"+minute, Toast.LENGTH_SHORT ).show();
-                                                        time = hour+"-"+minute;
-                                                        notes.add( new Note( date, time ) );
+                                                        Toast.makeText( MainActivity.this, hour + "-" + minute, Toast.LENGTH_SHORT ).show();
+                                                        time = hour + "-" + minute;
+                                                        notes.add( new Note( "note", date, time ) );
+                                                        postOnServer( "note", date, time );
                                                         noteAdapter.notifyDataSetChanged();
                                                     }
-                                                }, hour, minute, false);
+                                                }, hour, minute, false );
                                         timePickerDialog.show();
                                     }
                                 }, year, month, day ).show();
@@ -115,25 +122,66 @@ public class MainActivity extends AppCompatActivity {
         binding.api.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AndroidNetworking
-                        .get( "https://192.168.0.151:4000/users" )
-                        .setTag( "test" )
-                        .setPriority( Priority.LOW)
-                        .build()
-                        .getAsJSONArray( new JSONArrayRequestListener() {
-                            @Override
-                            public void onResponse(JSONArray response) {
-                                Toast.makeText( MainActivity.this, response.toString(), Toast.LENGTH_SHORT ).show();
-                            }
 
-                            @Override
-                            public void onError(ANError anError) {
-                                Toast.makeText( MainActivity.this, "Error", Toast.LENGTH_SHORT ).show();
-                            }
-                        } );
             }
         } );
 
+    }
+
+    private void getDataFromOnline() {
+        AndroidNetworking
+                .get( "https://note-manager-parkingkoi.herokuapp.com/notes/" )
+                .setTag( "test" )
+                .setPriority( Priority.LOW )
+                .build()
+                .getAsJSONArray( new JSONArrayRequestListener() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        Log.d( TAG, "onResponse: " );
+                        new AlertDialog
+                                .Builder( MainActivity.this )
+                                .setTitle( "Data" )
+                                .setMessage( response.toString() )
+                                .setCancelable( true )
+                                .show();
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                        Log.d( TAG, "onError: " );
+                        Toast.makeText( MainActivity.this, "Error", Toast.LENGTH_SHORT ).show();
+                    }
+                } );
+    }
+
+    private void postOnServer(String tile, String description, String alarm) {
+        AndroidNetworking.post("https://note-manager-parkingkoi.herokuapp.com/notes/")
+                .addBodyParameter("title", title)
+                .addBodyParameter("description", description)
+                .addBodyParameter( "alarm", alarm )
+                .setTag("test")
+                .setPriority(Priority.MEDIUM)
+                .build()
+                .getAsJSONObject(new JSONObjectRequestListener() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        new AlertDialog
+                                .Builder( MainActivity.this )
+                                .setTitle( "Data" )
+                                .setMessage( response.toString() )
+                                .setCancelable( true )
+                                .show();
+                    }
+                    @Override
+                    public void onError(ANError error) {
+                        new AlertDialog
+                                .Builder( MainActivity.this )
+                                .setTitle( "Data" )
+                                .setMessage( error.toString() )
+                                .setCancelable( true )
+                                .show();
+                    }
+                });
     }
 
 }

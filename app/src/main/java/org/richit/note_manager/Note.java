@@ -6,15 +6,18 @@ import android.os.Parcelable;
 public class Note implements Parcelable {
     String name;
     String description;
+    String alarm;
 
-    public Note(String name, String note) {
+    public Note(String name, String description, String alarm) {
         this.name = name;
-        this.description = note;
+        this.description = description;
+        this.alarm = alarm;
     }
 
     protected Note(Parcel in) {
         name = in.readString();
         description = in.readString();
+        alarm = in.readString();
     }
 
     public static final Creator<Note> CREATOR = new Creator<Note>() {
@@ -45,6 +48,13 @@ public class Note implements Parcelable {
         this.description = description;
     }
 
+    public String getAlarm() {
+        return alarm;
+    }
+
+    public void setAlarm(String alarm) {
+        this.alarm = alarm;
+    }
 
     @Override
     public int describeContents() {
@@ -55,5 +65,6 @@ public class Note implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString( name );
         parcel.writeString( description );
+        parcel.writeString( alarm );
     }
 }

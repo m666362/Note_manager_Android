@@ -9,8 +9,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 
 public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
@@ -34,6 +32,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull NoteAdapter.ViewHolder holder, int position) {
         holder.noteTitleTv.setText( notes.get( position ).getName() );
         holder.noteDescriptionTv.setText( notes.get( position ).getDescription() );
+        holder.alarmTv.setText( notes.get( position ).getAlarm() );
     }
 
     @Override
@@ -45,11 +44,13 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView noteTitleTv;
         TextView noteDescriptionTv;
+        TextView alarmTv;
         public ViewHolder(@NonNull View itemView) {
             super( itemView );
 
             noteTitleTv = itemView.findViewById( R.id.noteTitle );
             noteDescriptionTv = itemView.findViewById( R.id.noteDescription );
+            alarmTv = itemView.findViewById( R.id.alarm );
         }
     }
 }
